@@ -63,6 +63,12 @@ export default class User extends Model {
   @TypeORM.Column({ nullable: true, type: "integer" })
   register_time: number;
 
+  /**
+   * 当前级别
+   */
+  @TypeORM.Column({ default:"1", type: "integer" })
+  level_id: number;
+
   static async fromEmail(email): Promise<User> {
     return User.findOne({
       where: {

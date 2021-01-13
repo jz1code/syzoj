@@ -1,4 +1,5 @@
 let Problem = syzoj.model('problem');
+let ProblemExt = syzoj.model('problem_ext');
 let JudgeState = syzoj.model('judge_state');
 let FormattedCode = syzoj.model('formatted_code');
 let Contest = syzoj.model('contest');
@@ -238,6 +239,7 @@ app.get('/problem/:id', async (req, res) => {
 
 app.get('/problem/:id/export', async (req, res) => {
   try {
+    throw new ErrorMessage('无此题目。');
     let id = parseInt(req.params.id);
     let problem = await Problem.findById(id);
     if (!problem || !problem.is_public) throw new ErrorMessage('无此题目。');
@@ -361,6 +363,21 @@ app.post('/problem/:id/edit', async (req, res) => {
 
     let newTagIDs = await req.body.tags.map(x => parseInt(x)).filterAsync(async x => ProblemTag.findById(x));
     await problem.setTags(newTagIDs);
+
+    // added by joe 20200403
+    // 增加level 和 内容
+    if(req.body.level) {
+      let pe = await ProblemExt.findByProblemId(problem.id);
+      if (!pe) {
+        problemExt = await ProblemExt.create({
+          problem_id: problem.id,
+          level_id: req.body.level,
+          is_extra: req.body.extra
+        })
+
+        await problemExt.save()
+      }
+    }
 
     res.redirect(syzoj.utils.makeUrl(['problem', problem.id]));
   } catch (e) {
@@ -806,7 +823,7 @@ app.post('/problem/:id/testdata/delete/:filename', async (req, res) => {
     if (!problem) throw new ErrorMessage('无此题目。');
     if (!await problem.isAllowedEditBy(res.locals.user)) throw new ErrorMessage('您没有权限进行此操作。');
     if (typeof req.params.filename === 'string' && (req.params.filename.includes('../'))) throw new ErrorMessage('您没有权限进行此操作。)');
-    
+
     await problem.deleteTestdataSingleFile(req.params.filename);
 
     res.redirect(syzoj.utils.makeUrl(['problem', id, 'testdata']));

@@ -1,0 +1,126 @@
+<% this.title = '等级闯关' %>
+<% include header %>
+<div class="padding">
+    <div class="ui three column grid">
+        <div class="four wide column">
+            <h4 class="ui top attached block header"><i class="ui info icon"></i>闯关成就</h4>
+            <div class="ui bottom attached segment">
+                <p>当前等级：<strong><span style="color: #ff0000"><%= Math.floor(user.level_id/100) %></span></strong> 级 <strong><span
+                    style="color: #ff0000"><%= user.level_id%100 %></span></strong> 段
+                </p>
+
+                <div class="ui teal progress" data-value="<%= completed%>" data-total="<%= total%>"  id="progress">
+                    <div class="bar"></div>
+                </div>
+                <script>
+                    $('#progress').progress();
+                </script>
+                <% if(total > completed) {%>
+                <p style="color: #ff2600; font-size: 14px;">您还需要完成 <%= total-completed%> 道题目哦。</p>
+                <% } else { %>
+                <div>
+                    <p style="color: #228B22; font-size: 14px;">您已经完成必修题目，允许升级。</p>
+                    <form method="post">
+                        <input style="display: none" name="promote" value="true">
+                        <button class="small ui primary button btn btn-success btn-block" type="submit">确认升级</button>
+                    </form>
+                </div>
+                <% } %>
+            </div>
+            <div class="ui segment">
+                <div class="ui accordion">
+                    <% if(user.level_id>100) { %>
+                        <div class="title">
+                        <i class="dropdown icon"></i> 一级 
+                        <% for (let lid of levelIds) { %>
+                            <% if(lid <200 && lid <= user.level_id) {%>
+                                <a href="/level/<%= lid%>"><%= lid%100 %></a>
+                        <%}}%>
+                    </div>
+                    <div class="content">
+                        <p class="transition hidden"></p>
+                    </div>
+                    <% } %>
+                    <% if(user.level_id>200) { %>
+                        <div class="title">
+                            <i class="dropdown icon"></i> 二级
+                            <% for (let lid of levelIds) { %>
+                                <% if(lid >200 && lid <300 && lid <= user.level_id) {%>
+                                    <a href="/level/<%= lid%>"><%= lid%100 %></a>
+                            <%}}%>
+                            </div>
+                        <div class="content">
+                            <p>ff</p>
+                        </div>
+                    <% }%>
+                    <% if(user.level_id>300) { %>
+                        <div class="title">
+                            <i class="dropdown icon"></i> 三级
+                            <% for (let lid of levelIds) { %>
+                                <% if(lid >300 && lid <400 && lid <= user.level_id) {%>
+                                    <a href="/level/<%= lid%>"><%= lid%100 %></a>
+                            <%}}%>
+                           </div>
+                        <div class="content">
+                        </div>
+                    <% }%>
+                    <% if(user.level_id>400) { %>
+                        <div class="title">
+                            <i class="dropdown icon"></i> 四级
+                            <% for (let lid of levelIds) { %>
+                                <% if(lid >400 &&  lid <500 && lid <= user.level_id) {%>
+                                    <a href="/level/<%= lid%>"><%= lid%100 %></a>
+                            <%}}%>
+                           </div>
+                        <div class="content">
+                        </div>
+                    <% }%>
+                </div>
+            </div>
+
+        </div>
+        <!-- 题目列表 -->
+        <div class="right floated eleven wide column">
+            <table class="ui very basic center aligned table">
+                <thead>
+                  <tr>
+                    <% if (user) { %>
+                    <th class="one wide">状态</th>
+                    <% } %>
+                    <th class="one wide">编号</th>
+                    <th class="left aligned">题目名称</th>
+                    <th class="two wide">通过/提交</th>
+                    <th class="one wide">通过率</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <% for (let problem of problems) { %>
+                        <tr style="height: 44px; ">
+                            <td>
+                            <% if (user) { %>
+                                <% if (problem.judge_state) { %>
+                                    <a href="<%= syzoj.utils.makeUrl(['submission', problem.judge_state.id]) %>">
+                                    <span class="status <%= problem.judge_state.status.toLowerCase().split(' ').join('_') %>">
+                                        <i class="<%= icon[problem.judge_state.status] || 'remove' %> icon"></i>
+                                    </span>
+                                    </a>
+                                <% } %>
+                            <% } %>
+                            </td>
+                            <td><b><%= problem.id %></b></td>
+                            <td>
+                                <a style="vertical-align: middle; " href="<%= syzoj.utils.makeUrl(['problem', problem.id]) %>" target="_blank"><%= problem.title %>
+                                    <% if (!problem.is_public) { %><span class="ui header"><span class="ui tiny red label">未公开</span></span><% } %>
+                                </a>
+                            </td>
+                            <td><%= problem.ac_num %>/<%= problem.submit_num %></td>
+                            <td><%= problem.submit_num != 0 ? (((problem.ac_num / problem.submit_num * 100) || 0).toFixed(2) + '%') : '-' %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<% include footer %>
